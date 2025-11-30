@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Série 3 OPTIMISATION - Correction Détaillée</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/matlab.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f6f8fa; color: #24292e; margin: 0; padding: 0; }
+        .github-container { max-width: 960px; margin: 40px auto; background: white; border: 1px solid #e1e4e8; border-radius: 6px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); padding: 30px; }
+        h1 { color: #0366d6; border-bottom: 1px solid #eaecef; padding-bottom: 15px; margin-bottom: 25px; text-align: center; }
+        h2 { color: #2f363d; border-bottom: 1px solid #eaecef; padding-bottom: 5px; margin-top: 30px; }
+        h3 { color: #6a737d; margin-top: 20px; border-left: 3px solid #f9c513; padding-left: 10px; }
+        .nav-tabs { display: flex; border-bottom: 2px solid #0366d6; margin-bottom: 20px; }
+        .nav-item { padding: 10px 20px; cursor: pointer; background: #f6f8fa; border: 1px solid #e1e4e8; border-bottom: none; margin-right: 5px; border-radius: 6px 6px 0 0; transition: background 0.2s; }
+        .nav-item.active { background: white; border-color: #0366d6; border-bottom: 1px solid white; font-weight: 600; color: #0366d6; }
+        .tab-content { display: none; padding-top: 15px; }
+        .tab-content.active { display: block; }
+        pre code { display: block; padding: 15px; overflow-x: auto; background-color: #282c34; border-radius: 4px; }
+        .formula-box { background-color: #f7f9fb; border: 1px solid #ddd; padding: 15px; border-radius: 4px; margin: 15px 0; overflow-x: auto; }
+        .result-box { background-color: #e6ffed; border: 1px solid #3bc46e; padding: 15px; border-radius: 4px; margin-top: 15px; font-weight: 500; }
+        .warning-box { background-color: #fff6e8; border: 1px solid #ff9d00; padding: 10px; border-radius: 4px; margin-top: 15px; font-style: italic; }
+        .image-container { text-align: center; margin: 20px 0; padding: 10px; border: 1px dashed #ccc; background-color: #fafafa;}
+        .image-placeholder { color: #e74c3c; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="github-container">
+    <h1>Correction : Optimisation avec Contraintes d'Égalité (Série N°3)</h1>
+    <p>Ce document interactif utilise la méthode du **Lagrangien** conformément au Chapitre III du cours (M1 AII).</p>
+    
+    <div class="nav-tabs">
+        <div class="nav-item active" data-tab="ex1">Exercice 1</div>
+        <div class="nav-item" data-tab="ex4">Exercice 4</div>
+    </div>
+
+    <div id="ex1" class="tab-content active">
+        <h2>Exercice 1 : Minimisation sur Ellipsoïde</h2>
+        <div class="note-box warning-box">
+            **Problème :** Minimiser \( f(x) = (x_1-2)^2 + x_2^2 + x_3^2 \) S.T. \( h(x) = x_1^2 + 2x_2^2 + 3x_3^2 - 2 = 0 \).
+            <p>L'objectif est de trouver le point sur l'ellipsoïde \( h(x)=0 \) le plus proche (minimum) et le plus éloigné (maximum) du point \( (2, 0, 0) \).</p>
+            <div class="image-container">
+                <span class="image-placeholder">Emplacement du Graphique :</span>
+                
+                <p style="font-size: small; color: #6a737d;">Visualisation 3D de l'ellipsoïde (contrainte) et des deux points critiques (minimum en vert, maximum en rouge) par rapport au centre de la fonction objectif (point (2,0,0)).</p>
+            </div>
+        </div>
+
+        <h3>1. Le Lagrangien et FONC (Conditions du 1er Ordre)</h3>
+        <p>Le Lagrangien est :</p>
+        $$ L(x, \lambda) = (x_1-2)^2 + x_2^2 + x_3^2 + \lambda(x_1^2 + 2x_2^2 + 3x_3^2 - 2) $$
+        <p>Le système \( \nabla L = 0 \) impose \( x_2 = 0 \) et \( x_3 = 0 \), menant aux points réguliers :</p>
+
+        <h3>2. Points Réguliers et Multiplicateurs</h3>
+        <div class="result-box">
+            **Point 1 (Minimum) :** \( x = (\sqrt{2}, 0, 0) \). Multiplicateur : \( \lambda_1 = \sqrt{2} - 1 \approx 0.414 \). <br>
+            **Point 2 (Maximum) :** \( x = (-\sqrt{2}, 0, 0) \). Multiplicateur : \( \lambda_2 = -\sqrt{2} - 1 \approx -2.414 \).
+        </div>
+        
+        <h3>3. SONC (Conditions du 2nd Ordre) et Nature des Points</h3>
+        <p>L'analyse de la Hessienne \( H_L \) (Matrice diagonale) montre :</p>
+        <p>Pour P1 (\(\lambda_1 > 0\)) : \( H_L \) est **Définie Positive** (Minimum).</p>
+        <p>Pour P2 (\(\lambda_2 < 0\)) : \( H_L \) est **Définie Négative** (Maximum).</p>
+
+        <h3>4. Instruction MATLAB (Code Symbolique)</h3>
+        <pre><code class="matlab">
+% --- EXERCICE 1 : Analyse des points réguliers et de la Hessienne ---
+syms x1 x2 x3 lambda real
+
+f = (x1 - 2)^2 + x2^2 + x3^2;
+h = x1^2 + 2*x2^2 + 3*x3^2 - 2;
+L = f + lambda * h;
+
+% 1. Résolution des FONC
+grad_L = jacobian(L, [x1, x2, x3, lambda]);
+sol = solve(grad_L == 0, [x1, x2, x3, lambda]);
+% ... Affichage des solutions et analyse des valeurs propres de H ...
+        </code></pre>
+    </div>
+
+    <div id="ex4" class="tab-content">
+        <h2>Exercice 4 : Maximisation du Volume d'une Boîte</h2>
+        <div class="note-box warning-box">
+            **Problème :** Maximiser \( V = XYZ \) S.T. \( 2(XY + YZ + XZ) = 2700 \) et \( X = 2Y \).
+            <div class="image-container">
+                <span class="image-placeholder">Emplacement du Graphique :</span>
+                
+                <p style="font-size: small; color: #6a737d;">Schéma de la boîte rectangulaire avec ses dimensions (X, Y, Z) soumises aux contraintes de surface et de proportion.</p>
+            </div>
+        </div>
+
+        <h3>1. Réduction et Méthode du Cours (Minimiser \(-f\))</h3>
+        <p>Après substitution \( X=2Y \), le Lagrangien est formé pour minimiser le négatif du volume :</p>
+        $$ L(Y, Z, \lambda) = -2Y^2Z + \lambda(2Y^2 + 3YZ - 1350) $$
+
+        <h3>2. FONC et Résolution Algébrique</h3>
+        <p>La résolution du système \( \nabla L = 0 \) donne la relation de proportionnalité :</p>
+        $$ Z = \frac{4}{3}Y $$
+        <p>Remplaçant cette relation dans la contrainte de surface \( 2Y^2 + 3YZ = 1350 \), on obtient \( 6Y^2 = 1350 \).</p>
+
+        <h3>3. Dimensions Optimales</h3>
+        <div class="result-box">
+            $$ \mathbf{Y = 15 \text{ cm}} $$
+            $$ \mathbf{X} = 2Y = \mathbf{30 \text{ cm}} $$
+            $$ \mathbf{Z} = \frac{4}{3}Y = \mathbf{20 \text{ cm}} $$
+            **Volume Maximal :** \( V = 30 \times 15 \times 20 = \mathbf{9000 \text{ cm}^3} \)
+        </div>
+
+        <h3>4. Instruction MATLAB (Code Symbolique)</h3>
+        <pre><code class="matlab">
+% --- EXERCICE 4 : Maximisation du Volume ---
+syms Y Z lambda real
+
+% Objectif et Contrainte réduits
+Volume = 2 * Y^2 * Z;
+f_opt = -Volume;  % Minimisation de l'opposé pour la maximisation
+h = 2*Y^2 + 3*Y*Z - 1350;
+
+L = f_opt + lambda * h;
+
+% Résolution du Lagrangien
+grad_L = jacobian(L, [Y, Z, lambda]);
+assume(Y > 0); assume(Z > 0); % Les dimensions sont positives
+sol = solve(grad_L == 0, [Y, Z, lambda]);
+
+% Affichage des résultats
+Y_res = double(sol.Y);
+% ...
+        </code></pre>
+    </div>
+</div>
+
+<script>
+    // Initialise la coloration syntaxique
+    hljs.highlightAll();
+
+    // Logique de navigation par onglets
+    document.addEventListener('DOMContentLoaded', () => {
+        const tabs = document.querySelectorAll('.nav-item');
+        const contents = document.querySelectorAll('.tab-content');
+
+        const switchTab = (tabId) => {
+            tabs.forEach(tab => {
+                if (tab.getAttribute('data-tab') === tabId) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            contents.forEach(content => {
+                if (content.id === tabId) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+        };
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                switchTab(e.target.getAttribute('data-tab'));
+            });
+        });
+
+        // Initialisation : s'assurer que le premier onglet est actif
+        switchTab('ex1');
+    });
+</script>
+
+</body>
+</html>
