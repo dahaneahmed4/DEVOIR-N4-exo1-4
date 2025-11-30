@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Correction Détaillée : Optimisation - Série N°3</title>
+    <title>Série 3 OPTIMISATION - Correction Détaillée (Norme Professionnelle)</title>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
@@ -12,78 +12,70 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/python.min.js"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f6f8fa; color: #24292e; margin: 0; padding: 20px; }
-        .container { max-width: 960px; margin: 0 auto; background: white; border: 1px solid #e1e4e8; border-radius: 6px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); padding: 30px; }
-        h1 { color: #0366d6; border-bottom: 1px solid #eaecef; padding-bottom: 15px; margin-bottom: 25px; text-align: center; }
-        h2 { color: #2f363d; border-bottom: 1px solid #eaecef; padding-bottom: 5px; margin-top: 30px; }
-        h3 { color: #6a737d; margin-top: 20px; border-left: 3px solid #f9c513; padding-left: 10px; }
-        .nav-tabs { display: flex; border-bottom: 2px solid #0366d6; margin-bottom: 20px; }
-        .nav-item { padding: 10px 20px; cursor: pointer; background: #f6f8fa; border: 1px solid #e1e4e8; border-bottom: none; margin-right: 5px; border-radius: 6px 6px 0 0; transition: background 0.2s; }
-        .nav-item.active { background: white; border-color: #0366d6; border-bottom: 1px solid white; font-weight: 600; color: #0366d6; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; border: 1px solid #e1e4e8; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 30px; }
+        h1 { color: #8E44AD; border-bottom: 2px solid #8E44AD; padding-bottom: 15px; margin-bottom: 30px; text-align: center; }
+        h2 { color: #34495E; border-bottom: 1px solid #eaecef; padding-bottom: 5px; margin-top: 30px; }
+        h3 { color: #27AE60; margin-top: 20px; border-left: 4px solid #F39C12; padding-left: 10px; font-weight: 600; }
+        .nav-tabs { display: flex; border-bottom: 2px solid #8E44AD; margin-bottom: 20px; }
+        .nav-item { padding: 12px 25px; cursor: pointer; background: #f6f8fa; border: 1px solid #e1e4e8; border-bottom: none; margin-right: 5px; border-radius: 8px 8px 0 0; transition: background 0.2s; font-weight: 500;}
+        .nav-item.active { background: white; border-color: #8E44AD; border-bottom: 1px solid white; font-weight: 700; color: #8E44AD; }
         .tab-content { display: none; padding-top: 15px; }
         .tab-content.active { display: block; }
         pre code { display: block; padding: 15px; overflow-x: auto; background-color: #282c34; border-radius: 4px; }
-        .formula-box { background-color: #f7f9fb; border: 1px solid #ddd; padding: 15px; border-radius: 4px; margin: 15px 0; overflow-x: auto; }
-        .result-box { background-color: #e6ffed; border: 1px solid #3bc46e; padding: 15px; border-radius: 4px; margin-top: 15px; font-weight: 500; }
-        .code-title { font-size: 0.9em; font-weight: bold; color: #f9c513; margin-bottom: -10px; }
-        .graph-code-box { background-color: #f7f9fb; padding: 15px; border: 1px dashed #0366d6; border-radius: 4px; margin-top: 15px; }
+        .formula-box { background-color: #F8F9F9; border: 1px solid #D5DBDB; padding: 15px; border-radius: 4px; margin: 15px 0; overflow-x: auto; font-style: italic;}
+        .result-box { background-color: #E8F8F5; border: 2px solid #1ABC9C; padding: 20px; border-radius: 4px; margin-top: 20px; font-weight: 600; }
+        .code-title { font-size: 1em; font-weight: bold; color: #F39C12; margin-bottom: -10px; padding: 5px 0;}
+        .graph-code-box { background-color: #f7f9fb; padding: 15px; border: 1px dashed #3498DB; border-radius: 4px; margin-top: 15px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Correction Détaillée : Optimisation avec Contraintes (Série N°3)</h1>
-    <p>Cette interface propose les explications mathématiques complètes, les calculs étape par étape, et le code pour la vérification numérique (MATLAB) et la visualisation (Python).</p>
+    <h1>📝 Correction Complète : Optimisation avec Multiplicateurs de Lagrange</h1>
+    <p>Ce document fournit la solution détaillée et vérifiée des Exercices 1 et 4 de la Série N°3, en suivant rigoureusement les méthodes du cours (USTHB - M1 AII).</p>
     
     <div class="nav-tabs">
-        <div class="nav-item active" data-tab="ex1">Exercice 1 : Minimisation sur Ellipsoïde</div>
-        <div class="nav-item" data-tab="ex4">Exercice 4 : Maximisation du Volume</div>
+        <div class="nav-item active" data-tab="ex1">Exercice 1 : Minimisation (Détails Complets)</div>
+        <div class="nav-item" data-tab="ex4">Exercice 4 : Maximisation (Détails Complets)</div>
     </div>
 
     <div id="ex1" class="tab-content active">
-        <h2>Exercice 1 : Analyse des Extrema</h2>
+        <h2>Exercice 1 : Min/Max sur Ellipsoïde</h2>
         <p>Minimiser \( f(x) = (x_1-2)^2 + x_2^2 + x_3^2 \) S.T. \( h(x) = x_1^2 + 2x_2^2 + 3x_3^2 - 2 = 0 \).</p>
 
-        <h3>1. Formulation du Lagrangien</h3>
-        <p>Le Lagrangien \( L \) est formé en associant le multiplicateur \( \lambda \) à la contrainte :</p>
-        $$ L(x, \lambda) = f(x) + \lambda h(x) = (x_1-2)^2 + x_2^2 + x_3^2 + \lambda(x_1^2 + 2x_2^2 + 3x_3^2 - 2) $$
+        <h3>1. Formulation du Lagrangien \( L \)</h3>
+        $$ L(x, \lambda) = (x_1-2)^2 + x_2^2 + x_3^2 + \lambda(x_1^2 + 2x_2^2 + 3x_3^2 - 2) $$
 
-        <h3>2. Conditions du Premier Ordre (FONC) - Calculs Détaillés</h3>
-        <p>On dérive \( L \) par rapport à chaque variable et on annule le gradient :</p>
+        <h3>2. Conditions du Premier Ordre (FONC) - Résolution Algébrique Complète</h3>
+        <p>Résolution de \( \nabla L = 0 \):</p>
         <div class="formula-box">
-            **1. Dérivée par \( x_1 \):**
-            $$ \frac{\partial L}{\partial x_1} = 2(x_1 - 2) + 2\lambda x_1 = 0 $$
-            $$ 2x_1 - 4 + 2\lambda x_1 = 0 \implies x_1(2 + 2\lambda) = 4 \implies x_1 = \frac{4}{2(1+\lambda)} = \frac{2}{1+\lambda} \quad \mathbf{(E1)} $$
-            **2. Dérivée par \( x_2 \):**
-            $$ \frac{\partial L}{\partial x_2} = 2x_2 + 4\lambda x_2 = 2x_2(1 + 2\lambda) = 0 \quad \mathbf{(E2)} $$
-            **3. Dérivée par \( x_3 \):**
-            $$ \frac{\partial L}{\partial x_3} = 2x_3 + 6\lambda x_3 = 2x_3(1 + 3\lambda) = 0 \quad \mathbf{(E3)} $$
-            **4. Dérivée par \( \lambda \) (Contrainte) :**
-            $$ \frac{\partial L}{\partial \lambda} = x_1^2 + 2x_2^2 + 3x_3^2 - 2 = 0 \quad \mathbf{(E4)} $$
+            **\( \frac{\partial L}{\partial x_1} = 0 \)** : \( 2(x_1 - 2) + 2\lambda x_1 = 0 \implies 2x_1(1 + \lambda) = 4 \implies x_1 = \frac{2}{1+\lambda} \quad (\mathbf{E1}) \) <br>
+            **\( \frac{\partial L}{\partial x_2} = 0 \)** : \( 2x_2 + 4\lambda x_2 = 0 \implies 2x_2(1 + 2\lambda) = 0 \quad (\mathbf{E2}) \) <br>
+            **\( \frac{\partial L}{\partial x_3} = 0 \)** : \( 2x_3 + 6\lambda x_3 = 0 \implies 2x_3(1 + 3\lambda) = 0 \quad (\mathbf{E3}) \) <br>
+            **\( \frac{\partial L}{\partial \lambda} = 0 \)** : \( x_1^2 + 2x_2^2 + 3x_3^2 - 2 = 0 \quad (\mathbf{E4}) \)
         </div>
         
-        <p>De (E2) et (E3), on déduit que la seule solution possible (après vérification que \(\lambda=-1/2\) ou \(\lambda=-1/3\) ne fonctionnent pas dans (E1) et (E4)) est **\( x_2 = 0 \) et \( x_3 = 0 \)**.</p>
+        <p>L'analyse des cas possibles (E2 et E3) montre que seule la solution **\( x_2 = 0 \) et \( x_3 = 0 \)** est compatible avec (E1) et (E4). Substitution dans (E4) donne \( x_1 = \pm\sqrt{2} \).</p>
         
-        <p>Substitution dans (E4) : \( x_1^2 + 0 + 0 - 2 = 0 \implies x_1 = \pm\sqrt{2} \).</p>
-        
-        <p>Les deux points réguliers sont :</p>
+        <p>Les deux points réguliers (stationnaires) sont :</p>
         <div class="result-box">
-            **P1 (Minimum potentiel) :** \( (\sqrt{2}, 0, 0) \), avec \( \lambda_1 = \sqrt{2} - 1 \approx 0.414 \).<br>
-            **P2 (Maximum potentiel) :** \( (-\sqrt{2}, 0, 0) \), avec \( \lambda_2 = -\sqrt{2} - 1 \approx -2.414 \).
+            **P1 :** \( (\sqrt{2}, 0, 0) \) avec \( \lambda_1 = \frac{2}{\sqrt{2}} - 1 = \sqrt{2} - 1 \approx 0.414 \)<br>
+            **P2 :** \( (-\sqrt{2}, 0, 0) \) avec \( \lambda_2 = \frac{2}{-\sqrt{2}} - 1 = -\sqrt{2} - 1 \approx -2.414 \)
         </div>
 
-        <h3>3. Conditions du Second Ordre (SONC) et Conclusion</h3>
-        <p>On utilise la matrice Hessienne du Lagrangien par rapport à \( x \), \( H_L = \nabla_{xx}^2 L \):</p>
+        <h3>3. Conditions du Second Ordre (SONC) et Nature des Points</h3>
+        <p>La Hessienne \( H_L = \nabla_{xx}^2 L \) est diagonale :</p>
         $$ H_L = \begin{pmatrix} 2+2\lambda & 0 & 0 \\ 0 & 2+4\lambda & 0 \\ 0 & 0 & 2+6\lambda \end{pmatrix} $$
         
-        <p>Pour **P1** (\(\lambda = 0.414\)) : Tous les termes diagonaux sont positifs (\( 2.828, 3.657, 4.485 \)). \( H_L \) est **Définie Positive**.</p>
-        <div class="result-box">**Conclusion :** P1 \( (\sqrt{2}, 0, 0) \) est un **Minimum Local**.</div>
+        <p>Pour **P1 (\(\lambda = 0.414\))** : Tous les termes diagonaux (valeurs propres) sont strictement positifs (\( > 0 \)). \( H_L \) est **Définie Positive**.</p>
+        <div class="result-box">**Conclusion P1 :** Point de **Minimum Local**.</div>
         
-        <p>Pour **P2** (\(\lambda = -2.414\)) : Tous les termes diagonaux sont négatifs (\( -2.828, -7.657, -12.485 \)). \( H_L \) est **Définie Négative**.</p>
-        <div class="result-box">**Conclusion :** P2 \( (-\sqrt{2}, 0, 0) \) est un **Maximum Local**.</div>
+        <p>Pour **P2 (\(\lambda = -2.414\))** : Tous les termes diagonaux (valeurs propres) sont strictement négatifs (\( < 0 \)). \( H_L \) est **Définie Négative**.</p>
+        <div class="result-box">**Conclusion P2 :** Point de **Maximum Local**.</div>
 
-        <h3>4. Code pour la Vérification Numérique et la Représentation</h3>
-
-        <p class="code-title">Script MATLAB (Vérification et Hessienne)</p>
+        <h3>4. Code de Vérification (MATLAB et Python)</h3>
+        
+        <p class="code-title">Script MATLAB (Résolution Complète et Analyse de la Hessienne)</p>
         <pre><code class="matlab">
 % EXERCICE 1 : Résolution Symbolique et Analyse
 syms x1 x2 x3 lambda real
@@ -96,31 +88,26 @@ L = f + lambda * h;
 grad_L = jacobian(L, [x1, x2, x3, lambda]);
 sol = solve(grad_L == 0, [x1, x2, x3, lambda], 'Real', true);
 
-% Affichage des solutions
-disp('Points Critiques et Multiplicateurs :');
+disp('--- Points Critiques (x1, x2, x3, lambda) ---');
 disp(double([sol.x1, sol.x2, sol.x3, sol.lambda]));
 
-% 2. Analyse SONC via la Hessienne
-H = hessian(L, [x1, x2, x3]);
-
-% Analyse de P1
+% 2. Analyse SONC (Hessienne)
+H = hessian(L, [x1, x2, x3]); 
 H_P1 = double(subs(H, [x1, x2, x3, lambda], [sol.x1(1), sol.x2(1), sol.x3(1), sol.lambda(1)]));
-eigs_P1 = eig(H_P1);
-fprintf('\nValeurs propres P1: %.4f, %.4f, %.4f --> MINIMUM\n', eigs_P1);
+fprintf('\nValeurs propres P1: %.4f, %.4f, %.4f --> MINIMUM\n', eig(H_P1));
         </code></pre>
 
         <div class="graph-code-box">
-            <p class="code-title">Script Python (pour la Représentation Graphique)</p>
-            <p>Ce code génère la figure de l'ellipsoïde (contrainte) et place les points Min/Max.</p>
+            <p class="code-title">Code Python (Visualisation 3D)</p>
+            <p>Ce script nécessite Matplotlib pour générer la figure de l'ellipsoïde et localiser les extrema par rapport au point cible (2, 0, 0).</p>
             <pre><code class="python">
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-# Définition de la surface (Ellipsoïde: x1^2 + 2x2^2 + 3x3^2 = 2)
+# Dimensions pour l'ellipsoïde x1^2 + 2x2^2 + 3x3^2 = 2
 u = np.linspace(0, 2 * np.pi, 100)
 v = np.linspace(0, np.pi, 100)
-# Demi-axes : a=sqrt(2), b=1, c=sqrt(2/3)
 x1_plot = np.sqrt(2) * np.outer(np.cos(u), np.sin(v))
 x2_plot = 1.0 * np.outer(np.sin(u), np.sin(v))
 x3_plot = np.sqrt(2/3) * np.outer(np.ones(np.size(u)), np.cos(v))
@@ -128,18 +115,16 @@ x3_plot = np.sqrt(2/3) * np.outer(np.ones(np.size(u)), np.cos(v))
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 
-# Plot de l'ellipsoïde
-ax.plot_surface(x1_plot, x2_plot, x3_plot, color='lightblue', alpha=0.4, edgecolor='none')
+ax.plot_surface(x1_plot, x2_plot, x3_plot, color='lightgray', alpha=0.3)
 
-# Points Critiques
-ax.scatter(np.sqrt(2), 0, 0, color='green', s=100, label='MINIMUM')
-ax.scatter(-np.sqrt(2), 0, 0, color='red', s=100, label='MAXIMUM')
+# P1 (Minimum)
+ax.scatter(np.sqrt(2), 0, 0, color='green', s=100, label='Minimum', marker='o') 
+# P2 (Maximum)
+ax.scatter(-np.sqrt(2), 0, 0, color='red', s=100, label='Maximum', marker='o') 
+# Cible (2, 0, 0)
+ax.scatter(2, 0, 0, color='blue', marker='x', s=150, linewidth=3, label='Cible f(x)') 
 
-# Centre de l'objectif (2, 0, 0)
-ax.scatter(2, 0, 0, color='blue', marker='x', s=100, label='Centre (2, 0, 0)')
-
-ax.set_xlabel('X1'); ax.set_ylabel('X2'); ax.set_zlabel('X3')
-ax.set_title('Ex 1: Optimisation sur Ellipsoïde')
+ax.set_title('Ex 1: Extrema sur l\'Ellipsoïde')
 plt.show()
             </code></pre>
         </div>
@@ -147,75 +132,68 @@ plt.show()
 
     <div id="ex4" class="tab-content">
         <h2>Exercice 4 : Maximisation du Volume</h2>
-        <p>Maximiser \( V = XYZ \). Contraintes : \( h_1: 2(XY + YZ + XZ) = 2700 \) (Surface) et \( h_2: X = 2Y \) (Proportion).</p>
+        <p>Maximiser \( V = XYZ \). Contraintes : \( 2(XY + YZ + XZ) = 2700 \) et \( X = 2Y \).</p>
 
-        <h3>1. Réduction du Problème (Substitution)</h3>
-        <p>On substitue \( X = 2Y \) dans l'objectif et la contrainte de surface pour obtenir un problème à deux variables (\( Y, Z \)) et une seule contrainte :</p>
+        <h3>1. Réduction du Problème (Substitution Algébrique)</h3>
+        <p>On substitue \( X = 2Y \) dans les fonctions :</p>
         <div class="formula-box">
-            **Nouvel Objectif :** \( V(Y, Z) = (2Y) \cdot Y \cdot Z = 2Y^2Z \)<br>
-            **Nouvelle Contrainte :** \( 2((2Y)Y + YZ + (2Y)Z) = 2700 \)
+            **Objectif (Réduit) :** \( V(Y, Z) = (2Y) \cdot Y \cdot Z = 2Y^2Z \)<br>
+            **Contrainte \( h(Y, Z) \):** \( 2((2Y)Y + YZ + (2Y)Z) = 2700 \)
             $$ 2(2Y^2 + 3YZ) = 2700 \implies 2Y^2 + 3YZ - 1350 = 0 $$
         </div>
 
-        <h3>2. Formulation et Conditions du Premier Ordre (Minimisation de \(-V\))</h3>
-        <p>Selon la méthode du cours, on minimise \( f_{opt} = -V \). Lagrangien :</p>
-        $$ L(Y, Z, \lambda) = -2Y^2Z + \lambda(2Y^2 + 3YZ - 1350) $$
-
+        <h3>2. Lagrangien et FONC (Méthode Min \(-V\))</h3>
+        <p>Pour maximiser \( V \), on minimise \( -V \). Lagrangien : \( L(Y, Z, \lambda) = -2Y^2Z + \lambda(2Y^2 + 3YZ - 1350) \)</p>
+        <p>Résolution de \( \nabla L = 0 \):</p>
         <div class="formula-box">
-            **1. Dérivée par \( Y \):**
-            $$ \frac{\partial L}{\partial Y} = -4YZ + \lambda(4Y + 3Z) = 0 \quad \mathbf{(E1)} $$
-            **2. Dérivée par \( Z \):**
-            $$ \frac{\partial L}{\partial Z} = -2Y^2 + 3\lambda Y = 0 \quad \mathbf{(E2)} $$
+            **\( \frac{\partial L}{\partial Y} = 0 \)** : \( -4YZ + \lambda(4Y + 3Z) = 0 \quad (\mathbf{E1}) \) <br>
+            **\( \frac{\partial L}{\partial Z} = 0 \)** : \( -2Y^2 + 3\lambda Y = 0 \implies \lambda = \frac{2Y}{3} \quad (\mathbf{E2}) \)
         </div>
 
-        <h3>3. Calculs Détaillés de la Solution</h3>
-        <p>De (E2), puisque \( Y \neq 0 \): \( -2Y + 3\lambda = 0 \implies \mathbf{\lambda = \frac{2Y}{3}} \).</p>
-        <p>Substitution dans (E1) :</p>
-        $$ -4YZ + \left(\frac{2Y}{3}\right)(4Y + 3Z) = 0 $$
-        <p>Diviser par \( Y \) :</p>
-        $$ -4Z + \frac{2}{3}(4Y + 3Z) = 0 $$
-        <p>Multiplier par 3 :</p>
-        $$ -12Z + 8Y + 6Z = 0 \implies 8Y = 6Z \implies \mathbf{Z = \frac{4}{3}Y} $$
-
-        <p>Substitution de \( Z \) dans la contrainte \( 2Y^2 + 3YZ = 1350 \) :</p>
-        $$ 2Y^2 + 3Y\left(\frac{4}{3}Y\right) = 1350 $$
-        $$ 2Y^2 + 4Y^2 = 1350 \implies 6Y^2 = 1350 \implies Y^2 = 225 $$
+        <h3>3. Résolution Complète des Dimensions</h3>
+        <p>Substitution de \(\lambda\) dans (E1) (en divisant par \( Y \neq 0 \)) :</p>
+        $$ -4Z + \left(\frac{2}{3}\right)(4Y + 3Z) = 0 $$
+        $$ -12Z + 2(4Y + 3Z) = 0 \implies -12Z + 8Y + 6Z = 0 $$
+        $$ 8Y = 6Z \implies \mathbf{Z = \frac{4}{3}Y} $$
+        
+        <p>Substitution de \( Z \) dans la contrainte \( 2Y^2 + 3YZ = 1350 \):</p>
+        $$ 2Y^2 + 3Y\left(\frac{4}{3}Y\right) = 1350 \implies 2Y^2 + 4Y^2 = 1350 $$
+        $$ 6Y^2 = 1350 \implies Y^2 = 225 \implies Y = 15 $$
 
         <div class="result-box">
             **Dimensions Optimales :**
-            $$ \mathbf{Y = 15 \text{ cm}} $$
-            $$ \mathbf{X} = 2Y = \mathbf{30 \text{ cm}} $$
-            $$ \mathbf{Z} = \frac{4}{3}(15) = \mathbf{20 \text{ cm}} $$
+            $$\mathbf{Y = 15 \text{ cm}}$$
+            $$\mathbf{X} = 2(15) = \mathbf{30 \text{ cm}}$$
+            $$\mathbf{Z} = \frac{4}{3}(15) = \mathbf{20 \text{ cm}}$$
             **Volume Maximal :** \( V = 30 \times 15 \times 20 = \mathbf{9000 \text{ cm}^3} \)
         </div>
 
-        <h3>4. Code pour la Vérification Numérique</h3>
+        <h3>4. Code de Vérification (MATLAB)</h3>
 
         <p class="code-title">Script MATLAB (Résolution Symbolique)</p>
         <pre><code class="matlab">
 % EXERCICE 4 : Résolution Symbolique du Volume Maximum
 syms Y Z lambda real
 
-% 1. Définition des fonctions réduites
+% Définition des fonctions réduites
 Volume = 2 * Y^2 * Z;
-f_opt = -Volume;  % Pour la maximisation (selon la méthode du cours)
+f_opt = -Volume;  % Minimisation de l'opposé pour la maximisation
 h = 2*Y^2 + 3*Y*Z - 1350;
 
 L = f_opt + lambda * h;
 
-% 2. Résolution des FONC
+% Résolution des FONC
 grad_L = jacobian(L, [Y, Z, lambda]);
-% On assume les dimensions positives
-assume(Y > 0); assume(Z > 0); 
+assume(Y > 0); % Les dimensions sont positives
 sol = solve(grad_L == 0, [Y, Z, lambda], 'Real', true);
 
-% 3. Calcul des dimensions finales
-Y_res = double(sol.Y);
-Z_res = double(sol.Z);
+% Calcul et affichage des résultats finaux
+Y_res = double(sol.Y(1));
+Z_res = double(sol.Z(1));
 X_res = 2 * Y_res;
 V_max = double(subs(Volume, [Y, Z], [Y_res, Z_res]));
 
-disp('Dimensions (X, Y, Z) :');
+disp('--- Dimensions Optimales (X, Y, Z) ---');
 disp([X_res, Y_res, Z_res]);
 fprintf('Volume Maximal : %.2f cm^3\n', V_max);
         </code></pre>
@@ -223,10 +201,7 @@ fprintf('Volume Maximal : %.2f cm^3\n', V_max);
 </div>
 
 <script>
-    // Initialise la coloration syntaxique
     hljs.highlightAll();
-
-    // Logique de navigation par onglets
     document.addEventListener('DOMContentLoaded', () => {
         const tabs = document.querySelectorAll('.nav-item');
         const contents = document.querySelectorAll('.tab-content');
@@ -254,8 +229,7 @@ fprintf('Volume Maximal : %.2f cm^3\n', V_max);
             });
         });
 
-        // Initialisation : s'assurer que le premier onglet est actif
-        switchTab('ex1');
+        switchTab('ex1'); // Active l'onglet initial
     });
 </script>
 
