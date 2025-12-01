@@ -531,6 +531,13 @@
           <div id="closedLoopOut" class="output mt-3"></div>
         </details>
       </div>
+
+      <div class="card">
+        <h2 class="text-2xl font-semibold mb-2">8. Simulation comparative OL vs CL</h2>
+        <p class="muted">Réponse temporelle du pendule inversé: boucle ouverte (instable) vs boucle fermée (stabilisée).</p>
+        <button class="btn success" onclick="simulateCompare()">Simuler OL vs CL</button>
+        <div id="comparePlot" class="mt-3" style="height:420px;"></div>
+      </div>
     </section>
 
     <aside class="space-y-6">
@@ -566,7 +573,7 @@ Sorties: y = [θ, x]^T
   </footer>
 
   <script>
-    // Math helpers
+    // Math helpers and system definition
     const m = math;
     const a = 23.544;
     const b = -1.962;
@@ -683,7 +690,6 @@ Sorties: y = [θ, x]^T
     }
 
     function composeClosedLoop() {
-      // Recompute if not computed
       if (!window._K) computeController();
       if (!window._L) computeObserver();
       const K = window._K;
@@ -714,15 +720,7 @@ Sorties: y = [θ, x]^T
       document.getElementById('ctrbObsOut').textContent = out.join('\n');
     }
 
-    // Plot poles
-    function eigenvals(M) {
-      // math.js doesn't directly compute eigenvalues; use characteristic polynomial known:
-      // For A: s^2 (s^2 - a) -> eigenvalues 0,0, +sqrt(a), -sqrt(a)
-      // For Acl: we approximate by numeric via m.eigs in future. Here, we try numeric with a small helper using numeric.js-like?
-      // To ensure plotting works, we compute open-loop exactly; closed-loop we compute via characteristic poly of Acl (numeric det?), fallback to diagonalization fail-safe by sampling.
-      return null;
-    }
-
+    // Pole plots
     function plotOpenLoopPoles() {
       const xs = [0, 0,  Math.sqrt(a), -Math.sqrt(a)];
       const ys = [0, 0, 0, 0];
@@ -738,15 +736,8 @@ Sorties: y = [θ, x]^T
         height: 360
       });
     }
-
     function plotClosedLoopPoles() {
-      // We will compute numeric eigenvalues of Acl via characteristic polynomial using math.js's numeric eigen decomposition workaround:
-      if (!window._Acl) { computeController(); }
-      const Acl = window._Acl;
-      // Use Jordan form via math.js's pseudo method? Not available. Instead, approximate with numeric.js if present.
-      // As a practical workaround: sample eigenvalues using math.js's 'eigs' polyfill? Not available.
-      // We'll show the real parts by estimating with m.usolve after adding small perturbation; for visualization, we can compute eigenvalues via a simple power method per dimension.
-      // To keep this page self-contained, we approximate eigenvalues with a library-free method using characteristic polynomial from desired poles (since we placed poles, closed-loop eigenvalues = desired set).
+      // Since we placed poles by design, show desired closed-loop poles:
       const xs = [-2, -2, -5, -6];
       const ys = [ 2, -2, 0, 0];
       const colors = ['#f59e0b','#f59e0b','#f59e0b','#f59e0b'];
@@ -759,6 +750,65 @@ Sorties: y = [θ, x]^T
         xaxis: { title: 'Partie réelle' },
         yaxis: { title: 'Partie imaginaire', range: [-8,8] },
         height: 360
+      });
+    }
+
+    // Comparative step response OL vs CL (Euler integration)
+    function simulateCompare(){
+      const dt = 0.01; // finer time step
+      const T = 10;
+      const steps = Math.floor(T/dt);
+      let t = [], thetaOL = [], thetaCL = [], xOL = [], xCL = [];
+
+      // Initial conditions (small angle)
+      let stateOL = [0.1, 0, 0, 0]; // [θ, θ̇, x, ẋ]
+      let stateCL = [0.1, 0, 0, 0];
+
+      // Gains from computation or fallback
+      let K;
+      if (window._K) {
+        // window._K is 1x4 row matrix
+        K = window._K.valueOf()[0];
+      } else {
+        // Fallback gains (not used if computeController ran)
+        K = [-10, -8, -3, -2];
+      }
+      const g = window._g ? window._g : 1;
+
+      for(let i=0;i<steps;i++){
+        t.push(i*dt);
+
+        // Open-loop (u=0)
+        const uOL = 0;
+        const dx1_OL = stateOL[1];
+        const dx2_OL = a*stateOL[0] - 2*uOL;
+        const dx3_OL = stateOL[3];
+        const dx4_OL = b*stateOL[0] + uOL;
+        stateOL[0]+=dx1_OL*dt; stateOL[1]+=dx2_OL*dt;
+        stateOL[2]+=dx3_OL*dt; stateOL[3]+=dx4_OL*dt;
+        thetaOL.push(stateOL[0]); xOL.push(stateOL[2]);
+
+        // Closed-loop (step reference r=1 on x)
+        const uCL = -(K[0]*stateCL[0] + K[1]*stateCL[1] + K[2]*stateCL[2] + K[3]*stateCL[3]) + g*1;
+        const dx1_CL = stateCL[1];
+        const dx2_CL = a*stateCL[0] - 2*uCL;
+        const dx3_CL = stateCL[3];
+        const dx4_CL = b*stateCL[0] + uCL;
+        stateCL[0]+=dx1_CL*dt; stateCL[1]+=dx2_CL*dt;
+        stateCL[2]+=dx3_CL*dt; stateCL[3]+=dx4_CL*dt;
+        thetaCL.push(stateCL[0]); xCL.push(stateCL[2]);
+      }
+
+      Plotly.newPlot('comparePlot', [
+        {x:t, y:thetaOL, mode:'lines', name:'θ(t) OL (instable)', line:{color:'red'}},
+        {x:t, y:thetaCL, mode:'lines', name:'θ(t) CL (stabilisé)', line:{color:'green'}},
+        {x:t, y:xOL, mode:'lines', name:'x(t) OL', line:{color:'#3b82f6', dash:'dot'}},
+        {x:t, y:xCL, mode:'lines', name:'x(t) CL', line:{color:'#f59e0b', dash:'dot'}}
+      ], {
+        title:'Comparaison réponse temporelle — boucle ouverte vs fermée',
+        xaxis:{title:'Temps (s)'},
+        yaxis:{title:'Amplitude (rad / m)'},
+        height: 420
       });
     }
 
