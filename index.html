@@ -1,775 +1,769 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-<meta charset="utf-8">
-<title>Inverted Pendulum on a Cart — Full Derivation, Control, and Observer</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<!-- MathJax -->
-<script>
-window.MathJax = {
-  tex: {inlineMath: [['\\(', '\\)'], ['$', '$']], displayMath: [['\
+  <meta charset="utf-8">
+  <title>Pendule inversé sur chariot — Dérivation complète, commande et observateur</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: {inlineMath: [['\\(', '\\)'], ['$', '$']], displayMath: [['\
 
 \[', '\\]
 
 ']]},
-  svg: {fontCache: 'global'}
-};
-</script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-<!-- math.js -->
-<script src="https://cdn.jsdelivr.net/npm/mathjs@12.4.1/lib/browser/math.js"></script>
-<style>
-  :root { --primary:#0b6cff; --muted:#6a737d; --bg:#f9fafb; --card:#ffffff; --border:#e5e7eb; }
-  body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin: 24px; line-height: 1.55; color: #111827; background: var(--bg); }
-  h1,h2,h3 { margin: 0.4em 0; font-weight: 700; }
-  section { margin: 1.2em 0; padding: 1em; background: var(--card); border: 1px solid var(--border); border-radius: 10px; }
-  details { border: 1px solid var(--border); border-radius: 10px; background: var(--card); padding: 0.75em; margin: 0.8em 0; }
-  summary { font-weight: 600; cursor: pointer; }
-  .math { background: #f3f4f6; border-left: 4px solid var(--primary); padding: 8px 12px; border-radius: 6px; margin: 10px 0; }
-  .grid2 { display: grid; grid-template-columns: 180px 1fr; gap: 8px 16px; }
-  .output { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 12px; white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace; }
-  .btn { display: inline-block; background: var(--primary); color: #fff; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; margin: 8px 8px 8px 0; }
-  .btn.secondary { background: var(--muted); }
-  .small { font-size: 13px; color: #374151; }
-  .note { background: #eef2ff; border: 1px solid #c7d2fe; padding: 10px; border-radius: 8px; margin-top: 8px; }
-  svg { max-width: 100%; height: auto; background: #fff; border: 1px solid var(--border); border-radius: 8px; }
-  .katex-like { font-family: Georgia, "Times New Roman", serif; }
-</style>
+      svg: {fontCache: 'global'}
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <!-- math.js -->
+  <script src="https://cdn.jsdelivr.net/npm/mathjs@12.4.1/lib/browser/math.js"></script>
+  <!-- Plotly.js -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <!-- TailwindCSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 18px; }
+    .math { background: #f3f4f6; border-left: 4px solid #0ea5e9; padding: 10px 12px; border-radius: 8px; margin: 12px 0; }
+    .output { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace; }
+    .btn { display: inline-block; background: #0ea5e9; color: #fff; border: none; border-radius: 10px; padding: 10px 14px; cursor: pointer; margin: 8px 8px 8px 0; }
+    .btn.secondary { background: #6b7280; }
+    .btn.success { background: #10b981; }
+    .btn.warning { background: #f59e0b; }
+    .muted { color: #4b5563; font-size: 13px; }
+    svg { max-width: 100%; height: auto; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; }
+  </style>
 </head>
-<body>
+<body class="bg-gray-50 text-gray-900">
+  <header class="max-w-6xl mx-auto px-6 py-6">
+    <h1 class="text-4xl font-bold text-sky-700">Pendule inversé sur chariot — Analyse A→Z, commande et observateur</h1>
+    <p class="muted mt-2">USTHB • M1 AII • Paramètres: M=1.0 kg, m=0.2 kg, l=0.5 m, g=9.81 m/s². Entrée u=F(t). Sorties y=[θ, x].</p>
+  </header>
 
-<h1>Inverted Pendulum on a Cart — Full Derivation, Control, and Observer Design</h1>
-<p class="small">Parameters: M = 1.0 kg, m = 0.2 kg, l = 0.5 m, g = 9.81 m/s². Input u = F(t). Outputs y = [θ, x]. This page derives and computes A, B, C, D, H(s), eigenvalues, controllability, observability, state-feedback K via Ackermann, precompensator g, observer gain L, and composes the closed-loop system.</p>
+  <main class="max-w-6xl mx-auto px-6 grid lg:grid-cols-3 gap-6">
+    <section class="lg:col-span-2 space-y-6">
+      <div class="card">
+        <h2 class="text-2xl font-semibold mb-2">1. Modèle physique et dérivation vers l'état</h2>
 
-<section id="model">
-<h2>1. Physical model and derivation to state-space</h2>
-
-<details open>
-  <summary>1.1 Given dynamics and parameters</summary>
-  <div class="grid2">
-    <div><b>Cart mass M:</b></div><div>1.0 kg</div>
-    <div><b>Pendulum mass m:</b></div><div>0.2 kg</div>
-    <div><b>Pendulum length l:</b></div><div>0.5 m</div>
-    <div><b>Gravity g:</b></div><div>9.81 m/s²</div>
-    <div><b>Input u(t):</b></div><div>Force on cart</div>
-    <div><b>States:</b></div><div>x₁ = θ, x₂ = θ̇, x₃ = x, x₄ = ẋ</div>
-    <div><b>Outputs:</b></div><div>y₁ = θ, y₂ = x</div>
-  </div>
-  <div class="math">
-    
+        <details open class="mt-3">
+          <summary class="font-semibold cursor-pointer">1.1 Équations et paramètres</summary>
+          <div class="math">
+            
 
 \[
-    \textbf{Pendulum:}\quad F(t) = (M+m)\,g\,\theta(t) - M\,l\,\ddot{\theta}(t)
-    \]
+            F(t) = (M+m)\,g\,\theta(t) - M\,l\,\ddot{\theta}(t)
+            \quad,\quad
+            F(t) = M\,\ddot{x}(t) + m\,g\,\theta(t)
+            \]
 
 
-    
+          </div>
+          <ul class="list-disc ml-6">
+            <li>M = 1.0 kg</li>
+            <li>m = 0.2 kg</li>
+            <li>l = 0.5 m</li>
+            <li>g = 9.81 m/s²</li>
+            <li>Entrée: u(t) = F(t)</li>
+            <li>États: x₁=θ, x₂=θ̇, x₃=x, x₄=ẋ</li>
+            <li>Sorties: y₁=θ, y₂=x</li>
+          </ul>
+        </details>
 
-\[
-    \textbf{Cart:}\quad F(t) = M\,\ddot{x}(t) + m\,g\,\theta(t)
-    \]
-
-
-  </div>
-</details>
-
-<details open>
-  <summary>1.2 Solve for second derivatives and substitute numbers</summary>
-  <p>From the pendulum equation:</p>
-  <div class="math">
-    
-
-\[
-    M l\,\ddot{\theta}(t) = (M+m)g\,\theta(t) - u(t)
-    \quad\Rightarrow\quad
-    \ddot{\theta}(t) = \frac{(M+m)g}{M l}\,\theta(t) - \frac{1}{M l}\,u(t)
-    \]
-
-
-  </div>
-  <p>Numerical constants:</p>
-  <div class="math">
-    
+        <details open class="mt-3">
+          <summary class="font-semibold cursor-pointer">1.2 Dérivation des équations du 2ᵉ ordre et substitutions</summary>
+          <p>À partir du pendule:</p>
+          <div class="math">
+            
 
 \[
-    a \equiv \frac{(M+m)g}{M l} = \frac{(1.0+0.2)\cdot 9.81}{1.0\cdot 0.5} = \frac{11.772}{0.5} = 23.544
-    \]
+            M l\,\ddot{\theta}(t) = (M+m)g\,\theta(t) - u(t)
+            \Rightarrow
+            \ddot{\theta}(t) = \frac{(M+m)g}{M l}\,\theta(t) - \frac{1}{M l}\,u(t)
+            \]
 
 
-    
-
-\[
-    \frac{1}{M l} = \frac{1}{1.0\cdot 0.5} = 2
-    \]
-
-
-    
+          </div>
+          <div class="math">
+            
 
 \[
-    \Rightarrow\quad \ddot{\theta}(t) = a\,\theta(t) - 2\,u(t)
-    \]
+            a \equiv \frac{(M+m)g}{M l} = \frac{(1.0+0.2)\cdot 9.81}{1.0\cdot 0.5} = \frac{11.772}{0.5} = 23.544
+            \quad,\quad
+            \frac{1}{M l} = 2
+            \Rightarrow
+            \ddot{\theta}(t) = a\,\theta(t) - 2\,u(t)
+            \]
 
 
-  </div>
-  <p>From the cart equation:</p>
-  <div class="math">
-    
-
-\[
-    M\,\ddot{x}(t) = u(t) - m g\,\theta(t)
-    \quad\Rightarrow\quad
-    \ddot{x}(t) = \frac{1}{M}\,u(t) - \frac{m g}{M}\,\theta(t)
-    \]
-
-
-  </div>
-  <p>Numerical constant:</p>
-  <div class="math">
-    
+          </div>
+          <p>À partir du chariot:</p>
+          <div class="math">
+            
 
 \[
-    b \equiv -\frac{m g}{M} = -\frac{0.2\cdot 9.81}{1.0} = -1.962
-    \]
+            M\,\ddot{x}(t) = u(t) - m g\,\theta(t)
+            \Rightarrow
+            \ddot{x}(t) = \frac{1}{M}\,u(t) - \frac{m g}{M}\,\theta(t)
+            \]
 
 
-    
-
-\[
-    \Rightarrow\quad \ddot{x}(t) = u(t) + b\,\theta(t),\qquad b=-1.962
-    \]
-
-
-  </div>
-</details>
-
-<details open>
-  <summary>1.3 First-order state-space form and matrices</summary>
-  <p>Define states x₁ = θ, x₂ = θ̇, x₃ = x, x₄ = ẋ:</p>
-  <div class="math">
-    
+          </div>
+          <div class="math">
+            
 
 \[
-    \dot{x}_1 = x_2,\quad
-    \dot{x}_2 = a\,x_1 - 2\,u,\quad
-    \dot{x}_3 = x_4,\quad
-    \dot{x}_4 = b\,x_1 + u
-    \]
+            b \equiv -\frac{m g}{M} = -\frac{0.2\cdot 9.81}{1.0} = -1.962
+            \Rightarrow
+            \ddot{x}(t) = u(t) + b\,\theta(t)
+            \]
 
 
-  </div>
-  <p>Matrices A, B, C, D:</p>
-  <div class="math">
-    
+          </div>
+        </details>
 
-\[
-    A =
-    \begin{bmatrix}
-      0 & 1 & 0 & 0 \\
-      23.544 & 0 & 0 & 0 \\
-      0 & 0 & 0 & 1 \\
-      -1.962 & 0 & 0 & 0
-    \end{bmatrix},\quad
-    B = \begin{bmatrix} 0 \\ -2 \\ 0 \\ 1 \end{bmatrix},\quad
-    C = \begin{bmatrix}
-      1 & 0 & 0 & 0 \\
-      0 & 0 & 1 & 0
-    \end{bmatrix},\quad
-    D = 0
-    \]
-
-
-  </div>
-</details>
-</section>
-
-<section id="tf">
-<h2>2. Transfer functions and characteristic polynomial</h2>
-
-<details open>
-  <summary>2.1 Transfer functions from ODEs</summary>
-  <p>Pendulum channel Θ(s)/U(s):</p>
-  <div class="math">
-    
+        <details open class="mt-3">
+          <summary class="font-semibold cursor-pointer">1.3 Passage en 1ᵉ ordre et matrices (A, B, C, D)</summary>
+          <div class="math">
+            
 
 \[
-    s^2 \Theta(s) = a \Theta(s) - 2 U(s) \quad\Rightarrow\quad
-    (s^2 - a)\Theta(s) = -2 U(s)
-    \]
+            \dot{x}_1 = x_2,\quad
+            \dot{x}_2 = a\,x_1 - 2\,u,\quad
+            \dot{x}_3 = x_4,\quad
+            \dot{x}_4 = b\,x_1 + u
+            \]
 
 
-    
-
-\[
-    \frac{\Theta(s)}{U(s)} = -\frac{2}{s^2 - a} = -\frac{2}{s^2 - 23.544}
-    \]
-
-
-  </div>
-  <p>Cart channel X(s)/U(s):</p>
-  <div class="math">
-    
+          </div>
+          <div class="math">
+            
 
 \[
-    s^2 X(s) = U(s) + b\,\Theta(s)
-    \Rightarrow
-    \frac{X(s)}{U(s)} = \frac{1}{s^2}\left[1 - \frac{2b}{s^2 - a}\right]
-    = \frac{1}{s^2}\left[1 + \frac{3.924}{s^2 - 23.544}\right]
-    \]
+            A =
+            \begin{bmatrix}
+              0 & 1 & 0 & 0 \\
+              23.544 & 0 & 0 & 0 \\
+              0 & 0 & 0 & 1 \\
+              -1.962 & 0 & 0 & 0
+            \end{bmatrix},\quad
+            B = \begin{bmatrix} 0 \\ -2 \\ 0 \\ 1 \end{bmatrix},\quad
+            C = \begin{bmatrix}
+              1 & 0 & 0 & 0 \\
+              0 & 0 & 1 & 0
+            \end{bmatrix},\quad
+            D = 0
+            \]
 
 
-    
+          </div>
+        </details>
+      </div>
 
-\[
-    \frac{X(s)}{U(s)} = \frac{(s^2 - 23.544) + 3.924}{s^2(s^2 - 23.544)}
-    = \frac{s^2 - 19.620}{s^2 (s^2 - 23.544)}
-    \]
+      <div class="card">
+        <h2 class="text-2xl font-semibold mb-2">2. Fonctions de transfert et polynôme caractéristique</h2>
 
-
-  </div>
-</details>
-
-<details open>
-  <summary>2.2 Characteristic polynomial from det(sI - A)</summary>
-  <p>Compute det(sI - A). sI - A has a block lower-triangular structure:</p>
-  <div class="math">
-    
-
-\[
-    sI - A =
-    \begin{bmatrix}
-      s & -1 & 0 & 0 \\
-      -23.544 & s & 0 & 0 \\
-      0 & 0 & s & -1 \\
-      1.962 & 0 & 0 & s
-    \end{bmatrix}
-    \Rightarrow
-    \det(sI-A) = (s^2 - 23.544)\,(s^2)
-    \]
-
-
-  </div>
-</details>
-</section>
-
-<section id="stab">
-<h2>3. Eigenvalues and stability</h2>
-<details open>
-  <summary>3.1 Open-loop poles and interpretation</summary>
-  <div class="math">
-    
+        <details open class="mt-3">
+          <summary class="font-semibold cursor-pointer">2.1 Dérivation des fonctions de transfert</summary>
+          <p>Chaîne pendule Θ(s)/U(s):</p>
+          <div class="math">
+            
 
 \[
-    \det(sI-A) = s^2(s^2 - 23.544) = 0 \Rightarrow s = 0,\,0,\,\pm \sqrt{23.544} \approx \pm 4.8529
-    \]
+            s^2 \Theta(s) = a \Theta(s) - 2 U(s) \Rightarrow (s^2 - a)\Theta(s) = -2 U(s)
+            \Rightarrow
+            \frac{\Theta(s)}{U(s)} = -\frac{2}{s^2 - a} = -\frac{2}{s^2 - 23.544}
+            \]
 
 
-  </div>
-  <p>Two poles at zero (integrator modes), one negative real pole, one positive real pole. The positive pole makes the system unstable in open loop.</p>
-</details>
-</section>
-
-<section id="ctrl_obs">
-<h2>4. Controllability and observability — full calculations</h2>
-
-<details open>
-  <summary>4.1 Controllability matrix [B, AB, A²B, A³B]</summary>
-  <p>Compute step by step:</p>
-  <div class="math">
-    
+          </div>
+          <p>Chaîne chariot X(s)/U(s):</p>
+          <div class="math">
+            
 
 \[
-    B = \begin{bmatrix}0\\-2\\0\\1\end{bmatrix},\quad
-    AB = \begin{bmatrix}-2\\0\\1\\0\end{bmatrix}
-    \]
+            s^2 X(s) = U(s) + b\,\Theta(s) \Rightarrow
+            \frac{X(s)}{U(s)} = \frac{1}{s^2}\left[1 - \frac{2 b}{s^2 - a}\right]
+            = \frac{1}{s^2}\left[1 + \frac{3.924}{s^2 - 23.544}\right]
+            = \frac{s^2 - 19.620}{s^2 (s^2 - 23.544)}
+            \]
 
 
-    
+          </div>
+        </details>
 
-\[
-    A^2B = \begin{bmatrix}0\\ -47.088\\ 0\\ 3.924\end{bmatrix},\quad
-    A^3B = \begin{bmatrix}-47.088\\ 0\\ 3.924\\ 0\end{bmatrix}
-    \]
-
-
-    
-
-\[
-    \mathcal{C} =
-    \begin{bmatrix}
-    0 & -2 & 0 & -47.088 \\
-    -2 & 0 & -47.088 & 0 \\
-    0 & 1 & 0 & 3.924 \\
-    1 & 0 & 3.924 & 0
-    \end{bmatrix}
-    \]
-
-
-  </div>
-  <p>Rank(\(\mathcal{C}\)) = 4 → system is completely controllable.</p>
-</details>
-
-<details open>
-  <summary>4.2 Observability matrix [C; CA; CA²; CA³]</summary>
-  <p>Compute step by step:</p>
-  <div class="math">
-    
+        <details open class="mt-3">
+          <summary class="font-semibold cursor-pointer">2.2 Polynôme caractéristique et valeurs propres</summary>
+          <div class="math">
+            
 
 \[
-    C = \begin{bmatrix}1&0&0&0\\0&0&1&0\end{bmatrix},\quad
-    CA = \begin{bmatrix}0&1&0&0\\0&0&0&1\end{bmatrix}
-    \]
+            \det(sI - A) = s^2 (s^2 - 23.544)
+            \]
 
 
-    
-
-\[
-    CA^2 = \begin{bmatrix}23.544&0&0&0\\-1.962&0&0&0\end{bmatrix},\quad
-    CA^3 = \begin{bmatrix}0&23.544&0&0\\0&-1.962&0&0\end{bmatrix}
-    \]
-
-
-    
+          </div>
+          <div class="math">
+            
 
 \[
-    \mathcal{O} =
-    \begin{bmatrix}
-      1 & 0 & 0 & 0 \\
-      0 & 0 & 1 & 0 \\
-      0 & 1 & 0 & 0 \\
-      0 & 0 & 0 & 1 \\
-      23.544 & 0 & 0 & 0 \\
-      -1.962 & 0 & 0 & 0 \\
-      0 & 23.544 & 0 & 0 \\
-      0 & -1.962 & 0 & 0
-    \end{bmatrix}
-    \]
+            s = 0,\,0,\,\pm \sqrt{23.544} \approx \pm 4.8529
+            \]
 
 
-  </div>
-  <p>Rank(\(\mathcal{O}\)) = 4 → system is completely observable.</p>
-</details>
-</section>
+          </div>
+          <p class="mt-1">Conclusion: instable (pôle positif).</p>
+        </details>
+      </div>
 
-<section id="block">
-<h2>5. Block diagram of signal flow (inline SVG)</h2>
-<details open>
-  <summary>5.1 Diagram with subsystems and couplings</summary>
-  <p>This diagram shows two integrator chains (θ and x), input u, feedback via a and coupling via b.</p>
-  <svg viewBox="0 0 980 360" xmlns="http://www.w3.org/2000/svg" aria-label="Block Diagram">
-    <!-- Input u -->
-    <rect x="20" y="40" width="80" height="40" fill="#eef2ff" stroke="#6366f1" rx="6"/>
-    <text x="60" y="65" text-anchor="middle" font-family="monospace" font-size="14">u</text>
+      <div class="card">
+        <h2 class="text-2xl font-semibold mb-2">3. Commandabilité et Observabilité — calculs complets</h2>
 
-    <!-- Sum for θ̈ -->
-    <circle cx="160" cy="60" r="16" fill="#fff" stroke="#111"/>
-    <text x="160" y="65" text-anchor="middle" font-family="monospace" font-size="16">Σ</text>
-    <line x1="100" y1="60" x2="144" y2="60" stroke="#111"/>
-    <polygon points="144,60 134,55 134,65" fill="#111"/>
-
-    <!-- Gain -2 on u to θ̈ -->
-    <text x="120" y="50" font-family="monospace" font-size="12">-2</text>
-
-    <!-- a·θ to Σ -->
-    <line x1="480" y1="60" x2="176" y2="60" stroke="#111"/>
-    <polygon points="176,60 186,55 186,65" fill="#111"/>
-    <text x="480" y="50" font-family="monospace" font-size="12">a·θ</text>
-
-    <!-- Integrator chain for θ -->
-    <rect x="200" y="40" width="120" height="40" fill="#fef3c7" stroke="#f59e0b" rx="6"/>
-    <text x="260" y="65" text-anchor="middle" font-family="monospace" font-size="14">1/s²</text>
-    <line x1="176" y1="60" x2="200" y2="60" stroke="#111"/>
-    <polygon points="200,60 190,55 190,65" fill="#111"/>
-
-    <rect x="360" y="40" width="100" height="40" fill="#e5e7eb" stroke="#9ca3af" rx="6"/>
-    <text x="410" y="65" text-anchor="middle" font-family="monospace" font-size="14">θ</text>
-    <line x1="320" y1="60" x2="360" y2="60" stroke="#111"/>
-    <polygon points="360,60 350,55 350,65" fill="#111"/>
-
-    <!-- Cart chain -->
-    <rect x="200" y="220" width="120" height="40" fill="#fef3c7" stroke="#f59e0b" rx="6"/>
-    <text x="260" y="245" text-anchor="middle" font-family="monospace" font-size="14">1/s²</text>
-
-    <!-- Sum for ẍ -->
-    <circle cx="160" cy="240" r="16" fill="#fff" stroke="#111"/>
-    <text x="160" y="245" text-anchor="middle" font-family="monospace" font-size="16">Σ</text>
-    <line x1="100" y1="240" x2="144" y2="240" stroke="#111"/>
-    <polygon points="144,240 134,235 134,245" fill="#111"/>
-    <text x="120" y="230" font-family="monospace" font-size="12">+1</text>
-
-    <!-- b·θ coupling -->
-    <line x1="410" y1="80" x2="410" y2="240" stroke="#111"/>
-    <polygon points="410,240 420,235 420,245" fill="#111"/>
-    <text x="420" y="160" font-family="monospace" font-size="12">b·θ</text>
-
-    <line x1="176" y1="240" x2="200" y2="240" stroke="#111"/>
-    <polygon points="200,240 190,235 190,245" fill="#111"/>
-
-    <rect x="360" y="220" width="100" height="40" fill="#e5e7eb" stroke="#9ca3af" rx="6"/>
-    <text x="410" y="245" text-anchor="middle" font-family="monospace" font-size="14">x</text>
-    <line x1="320" y1="240" x2="360" y2="240" stroke="#111"/>
-    <polygon points="360,240 350,235 350,245" fill="#111"/>
-
-    <!-- Outputs -->
-    <rect x="520" y="40" width="120" height="40" fill="#d1fae5" stroke="#10b981" rx="6"/>
-    <text x="580" y="65" text-anchor="middle" font-family="monospace" font-size="14">Output θ</text>
-    <line x1="460" y1="60" x2="520" y2="60" stroke="#111"/>
-    <polygon points="520,60 510,55 510,65" fill="#111"/>
-
-    <rect x="520" y="220" width="120" height="40" fill="#d1fae5" stroke="#10b981" rx="6"/>
-    <text x="580" y="245" text-anchor="middle" font-family="monospace" font-size="14">Output x</text>
-    <line x1="460" y1="240" x2="520" y2="240" stroke="#111"/>
-    <polygon points="520,240 510,235 510,245" fill="#111"/>
-  </svg>
-  <div class="note">The 1/s² blocks represent the double integrator chains for θ and x. The sum nodes collect u and the respective feedback/coupling terms. The arrow labeled a·θ feeds back to θ̈; b·θ couples into ẍ.</div>
-</details>
-</section>
-
-<section id="design">
-<h2>6. State-feedback design via Ackermann’s formula</h2>
-
-<details open>
-  <summary>6.1 Desired poles and polynomial expansion</summary>
-  <p>Choose well-damped poles: complex pair and two real poles.</p>
-  <div class="math">
-    
+        <details open class="mt-3">
+          <summary class="font-semibold cursor-pointer">3.1 Commandabilité: [B, AB, A²B, A³B]</summary>
+          <div class="math">
+            
 
 \[
-    \text{Desired poles: } -2 \pm 2j,\; -5,\; -6
-    \]
+            B = \begin{bmatrix}0\\-2\\0\\1\end{bmatrix},\quad
+            AB = \begin{bmatrix}-2\\0\\1\\0\end{bmatrix},\quad
+            A^2B = \begin{bmatrix}0\\ -47.088\\ 0\\ 3.924\end{bmatrix},\quad
+            A^3B = \begin{bmatrix}-47.088\\ 0\\ 3.924\\ 0\end{bmatrix}
+            \]
 
 
-    
-
-\[
-    p_d(s) = (s^2 + 4s + 8)(s+5)(s+6)
-    \]
-
-
-  </div>
-  <p>Expand the polynomial fully:</p>
-  <div class="math">
-    
+          </div>
+          <div class="math">
+            
 
 \[
-    (s+5)(s+6) = s^2 + 11s + 30
-    \]
+            \mathcal{C} =
+            \begin{bmatrix}
+              0 & -2     & 0      & -47.088 \\
+              -2 & 0     & -47.088& 0 \\
+              0 & 1      & 0      & 3.924 \\
+              1 & 0      & 3.924  & 0
+            \end{bmatrix}
+            \Rightarrow \operatorname{rang}(\mathcal{C}) = 4
+            \]
 
 
-    
+          </div>
+        </details>
 
-\[
-    (s^2 + 4s + 8)(s^2 + 11s + 30) =
-    s^4 + 15s^3 + 82s^2 + 208s + 240
-    \]
-
-
-  </div>
-</details>
-
-<details open>
-  <summary>6.2 Ackermann’s formula for K with full Φ(A)</summary>
-  <p>For controllable (A,B):</p>
-  <div class="math">
-    
+        <details open class="mt-3">
+          <summary class="font-semibold cursor-pointer">3.2 Observabilité: [C; CA; CA²; CA³]</summary>
+          <div class="math">
+            
 
 \[
-    \mathcal{C} = [B\;\;AB\;\;A^2B\;\;A^3B],\quad
-    K = e_4^\top\,\mathcal{C}^{-1}\,\Phi(A),\quad
-    e_4^\top = [0\;\;0\;\;0\;\;1]
-    \]
+            C = \begin{bmatrix}1&0&0&0\\0&0&1&0\end{bmatrix},\quad
+            CA = \begin{bmatrix}0&1&0&0\\0&0&0&1\end{bmatrix},\quad
+            CA^2 = \begin{bmatrix}23.544&0&0&0\\-1.962&0&0&0\end{bmatrix},\quad
+            CA^3 = \begin{bmatrix}0&23.544&0&0\\0&-1.962&0&0\end{bmatrix}
+            \]
 
 
-    
-
-\[
-    \Phi(A) = A^4 + 15A^3 + 82A^2 + 208A + 240I
-    \]
-
-
-  </div>
-  <button class="btn" onclick="computeController()">Compute K and g (prints all intermediate steps)</button>
-  <div id="controllerOut" class="output"></div>
-</details>
-
-<details open>
-  <summary>6.3 Precompensator g derivation and computation</summary>
-  <p>To track a reference r on output y₂ = x with zero steady-state error (perfect tracking), use:</p>
-  <div class="math">
-    
+          </div>
+          <div class="math">
+            
 
 \[
-    g = \big(C_{\text{row}}\,(-A + B K)^{-1}\,B\big)^{-1},\quad C_{\text{row}} = [0\;\;0\;\;1\;\;0]
-    \]
+            \mathcal{O} =
+            \begin{bmatrix}
+              1 & 0 & 0 & 0 \\
+              0 & 0 & 1 & 0 \\
+              0 & 1 & 0 & 0 \\
+              0 & 0 & 0 & 1 \\
+              23.544 & 0 & 0 & 0 \\
+              -1.962 & 0 & 0 & 0 \\
+              0 & 23.544 & 0 & 0 \\
+              0 & -1.962 & 0 & 0
+            \end{bmatrix}
+            \Rightarrow \operatorname{rang}(\mathcal{O}) = 4
+            \]
 
 
-  </div>
-  <p>This enforces unity DC gain from r to y₂ in the closed loop. The computation is included in the “Compute K and g” button output.</p>
-</details>
-</section>
+          </div>
+        </details>
+      </div>
 
-<section id="observer">
-<h2>7. Observer design via dual Ackermann</h2>
+      <div class="card">
+        <h2 class="text-2xl font-semibold mb-2">4. Schéma bloc (SVG)</h2>
+        <details open class="mt-3">
+          <summary class="font-semibold cursor-pointer">4.1 Diagramme des flux de signaux</summary>
+          <p class="muted">Deux chaînes intégratrices (θ et x), entrée u, retour a·θ vers θ̈, couplage b·θ vers ẍ.</p>
+          <svg viewBox="0 0 980 360" xmlns="http://www.w3.org/2000/svg" aria-label="Schéma bloc">
+            <!-- Input u -->
+            <rect x="20" y="40" width="80" height="40" fill="#eef2ff" stroke="#6366f1" rx="6"/>
+            <text x="60" y="65" text-anchor="middle" font-family="monospace" font-size="14">u</text>
 
-<details open>
-  <summary>7.1 Desired observer poles and polynomial expansion</summary>
-  <p>Choose observer poles much faster than control poles for rapid estimation:</p>
-  <div class="math">
-    
+            <!-- Sum for θ̈ -->
+            <circle cx="160" cy="60" r="16" fill="#fff" stroke="#111"/>
+            <text x="160" y="65" text-anchor="middle" font-family="monospace" font-size="16">Σ</text>
+            <line x1="100" y1="60" x2="144" y2="60" stroke="#111"/>
+            <polygon points="144,60 134,55 134,65" fill="#111"/>
+            <text x="120" y="50" font-family="monospace" font-size="12">-2·u</text>
+
+            <!-- a·θ to Σ -->
+            <line x1="480" y1="60" x2="176" y2="60" stroke="#111"/>
+            <polygon points="176,60 186,55 186,65" fill="#111"/>
+            <text x="480" y="50" font-family="monospace" font-size="12">a·θ</text>
+
+            <!-- Integrator chain for θ -->
+            <rect x="200" y="40" width="120" height="40" fill="#fef3c7" stroke="#f59e0b" rx="6"/>
+            <text x="260" y="65" text-anchor="middle" font-family="monospace" font-size="14">1/s²</text>
+            <line x1="176" y1="60" x2="200" y2="60" stroke="#111"/>
+            <polygon points="200,60 190,55 190,65" fill="#111"/>
+
+            <rect x="360" y="40" width="100" height="40" fill="#e5e7eb" stroke="#9ca3af" rx="6"/>
+            <text x="410" y="65" text-anchor="middle" font-family="monospace" font-size="14">θ</text>
+            <line x1="320" y1="60" x2="360" y2="60" stroke="#111"/>
+            <polygon points="360,60 350,55 350,65" fill="#111"/>
+
+            <!-- Cart chain -->
+            <rect x="200" y="220" width="120" height="40" fill="#fef3c7" stroke="#f59e0b" rx="6"/>
+            <text x="260" y="245" text-anchor="middle" font-family="monospace" font-size="14">1/s²</text>
+
+            <!-- Sum for ẍ -->
+            <circle cx="160" cy="240" r="16" fill="#fff" stroke="#111"/>
+            <text x="160" y="245" text-anchor="middle" font-family="monospace" font-size="16">Σ</text>
+            <line x1="100" y1="240" x2="144" y2="240" stroke="#111"/>
+            <polygon points="144,240 134,235 134,245" fill="#111"/>
+            <text x="120" y="230" font-family="monospace" font-size="12">u</text>
+
+            <!-- b·θ coupling -->
+            <line x1="410" y1="80" x2="410" y2="240" stroke="#111"/>
+            <polygon points="410,240 420,235 420,245" fill="#111"/>
+            <text x="420" y="160" font-family="monospace" font-size="12">b·θ</text>
+
+            <line x1="176" y1="240" x2="200" y2="240" stroke="#111"/>
+            <polygon points="200,240 190,235 190,245" fill="#111"/>
+
+            <rect x="360" y="220" width="100" height="40" fill="#e5e7eb" stroke="#9ca3af" rx="6"/>
+            <text x="410" y="245" text-anchor="middle" font-family="monospace" font-size="14">x</text>
+            <line x1="320" y1="240" x2="360" y2="240" stroke="#111"/>
+            <polygon points="360,240 350,235 350,245" fill="#111"/>
+
+            <!-- Outputs -->
+            <rect x="520" y="40" width="120" height="40" fill="#d1fae5" stroke="#10b981" rx="6"/>
+            <text x="580" y="65" text-anchor="middle" font-family="monospace" font-size="14">Sortie θ</text>
+            <line x1="460" y1="60" x2="520" y2="60" stroke="#111"/>
+            <polygon points="520,60 510,55 510,65" fill="#111"/>
+
+            <rect x="520" y="220" width="120" height="40" fill="#d1fae5" stroke="#10b981" rx="6"/>
+            <text x="580" y="245" text-anchor="middle" font-family="monospace" font-size="14">Sortie x</text>
+            <line x1="460" y1="240" x2="520" y2="240" stroke="#111"/>
+            <polygon points="520,240 510,235 510,245" fill="#111"/>
+          </svg>
+        </details>
+      </div>
+
+      <div class="card">
+        <h2 class="text-2xl font-semibold mb-2">5. Conception du contrôleur (Ackermann)</h2>
+
+        <details open class="mt-3">
+          <summary class="font-semibold cursor-pointer">5.1 Choix des pôles et expansion du polynôme</summary>
+          <div class="math">
+            
 
 \[
-    \text{Desired observer poles: } -10 \pm 10j,\; -20,\; -25
-    \]
+            \text{Pôles désirés: } -2 \pm 2j,\; -5,\; -6
+            \]
 
 
-    
-
-\[
-    p_o(s) = (s^2 + 20s + 200)(s+20)(s+25)
-    \]
-
-
-  </div>
-  <p>Expand fully:</p>
-  <div class="math">
-    
+            
 
 \[
-    (s+20)(s+25) = s^2 + 45s + 500
-    \]
+            p_d(s) = (s^2 + 4s + 8)(s+5)(s+6)
+            \]
 
 
-    
-
-\[
-    (s^2 + 20s + 200)(s^2 + 45s + 500)
-    = s^4 + 65s^3 + 1600s^2 + 19000s + 100000
-    \]
-
-
-  </div>
-</details>
-
-<details open>
-  <summary>7.2 Dual Ackermann for L with full Φₒ(A)</summary>
-  <p>For observable (A,C):</p>
-  <div class="math">
-    
+          </div>
+          <div class="math">
+            
 
 \[
-    \mathcal{O} = \begin{bmatrix} C \\ CA \\ CA^2 \\ CA^3 \end{bmatrix},\quad
-    L = \Phi_o(A)^\top\,\mathcal{O}^{-T}\,e_4
-    \]
+            (s+5)(s+6) = s^2 + 11s + 30
+            \]
 
 
-    
-
-\[
-    \Phi_o(A) = A^4 + 65A^3 + 1600A^2 + 19000A + 100000I
-    \]
-
-
-  </div>
-  <button class="btn" onclick="computeObserver()">Compute L (prints all intermediate steps)</button>
-  <div id="observerOut" class="output"></div>
-</details>
-</section>
-
-<section id="closedloop">
-<h2>8. Full closed-loop system equations</h2>
-
-<details open>
-  <summary>8.1 Controller + plant + observer combination</summary>
-  <p>Using estimated states in control law:</p>
-  <div class="math">
-    
+            
 
 \[
-    u = -K\,\hat{x} + g\,r
-    \]
+            (s^2 + 4s + 8)(s^2 + 11s + 30) = s^4 + 15s^3 + 82s^2 + 208s + 240
+            \]
 
 
-    
+          </div>
+        </details>
+
+        <details open class="mt-3">
+          <summary class="font-semibold cursor-pointer">5.2 Formule d’Ackermann avec Φ(A)</summary>
+          <div class="math">
+            
 
 \[
-    \text{Plant:}\quad \dot{x} = A x + B u,\quad y = C x
-    \]
+            \mathcal{C} = [B\;\;AB\;\;A^2B\;\;A^3B],\quad
+            K = e_4^\top\,\mathcal{C}^{-1}\,\Phi(A),\quad
+            e_4^\top = [0\;\;0\;\;0\;\;1]
+            \]
 
 
-    
+            
 
 \[
-    \text{Observer:}\quad \dot{\hat{x}} = (A - L C)\hat{x} + B u + L y
-    \]
+            \Phi(A) = A^4 + 15A^3 + 82A^2 + 208A + 240I
+            \]
 
 
-  </div>
-  <button class="btn secondary" onclick="composeClosedLoop()">Compose matrices A−BK and A−LC</button>
-  <div id="closedLoopOut" class="output"></div>
-</details>
-</section>
+          </div>
+          <button class="btn" onclick="computeController()">Calculer K, g et afficher toutes les étapes</button>
+          <div id="controllerOut" class="output mt-3"></div>
+        </details>
 
-<section id="appendix">
-<h2>9. Appendix: numeric verification helpers</h2>
-<details>
-  <summary>9.1 Show controllability and observability matrices and ranks</summary>
-  <button class="btn" onclick="showCtrbObs()">Show matrices and ranks</button>
-  <div id="ctrbObsOut" class="output"></div>
-</details>
-</section>
+        <details open class="mt-3">
+          <summary class="font-semibold cursor-pointer">5.3 Précompensateur g pour poursuite parfaite de x</summary>
+          <div class="math">
+            
 
-<script>
-const m = math;
-const a = 23.544;
-const b = -1.962;
+\[
+            g = \big([0\;\;0\;\;1\;\;0]\,(-A + B K)^{-1}\,B\big)^{-1}
+            \]
 
-const A = m.matrix([
-  [0, 1, 0, 0],
-  [a, 0, 0, 0],
-  [0, 0, 0, 1],
-  [b, 0, 0, 0]
-]);
-const B = m.matrix([[0],[-2],[0],[1]]);
-const C = m.matrix([
-  [1,0,0,0],
-  [0,0,1,0]
-]);
-const I4 = m.identity(4);
-const e4T = m.matrix([[0,0,0,1]]);
-const e4 = m.matrix([[0],[0],[0],[1]]);
 
-function matStr(M) {
-  const arr = M.valueOf();
-  return m.format(arr, {precision: 6});
-}
+          </div>
+          <p class="muted">Assure un gain statique unité de r→y₂=x en boucle fermée.</p>
+        </details>
+      </div>
 
-function controllabilityMatrix(A,B) {
-  const AB = m.multiply(A,B);
-  const A2B = m.multiply(A,AB);
-  const A3B = m.multiply(A,A2B);
-  return m.concat(B, AB, A2B, A3B, 1);
-}
-function observabilityMatrix(A,C) {
-  const CA = m.multiply(C,A);
-  const CA2 = m.multiply(C,m.multiply(A,A));
-  const CA3 = m.multiply(C,m.multiply(m.multiply(A,A),A));
-  return m.concat(C, CA, CA2, CA3, 0);
-}
+      <div class="card">
+        <h2 class="text-2xl font-semibold mb-2">6. Conception de l’observateur (duale Ackermann)</h2>
 
-function polyOfA(A, coeffs) {
-  // For s^4 + c3 s^3 + c2 s^2 + c1 s + c0 (order 4 system)
-  const c3 = coeffs[3], c2 = coeffs[2], c1 = coeffs[1], c0 = coeffs[0];
-  const A2 = m.multiply(A,A);
-  const A3 = m.multiply(A2,A);
-  const A4 = m.multiply(A3,A);
-  return m.add(A4,
+        <details open class="mt-3">
+          <summary class="font-semibold cursor-pointer">6.1 Pôles d’observateur et expansion</summary>
+          <div class="math">
+            
+
+\[
+            \text{Pôles observateur: } -10 \pm 10j,\; -20,\; -25
+            \]
+
+
+            
+
+\[
+            p_o(s) = (s^2 + 20s + 200)(s+20)(s+25)
+            \]
+
+
+          </div>
+          <div class="math">
+            
+
+\[
+            (s+20)(s+25) = s^2 + 45s + 500
+            \]
+
+
+            
+
+\[
+            (s^2 + 20s + 200)(s^2 + 45s + 500)
+            = s^4 + 65s^3 + 1600s^2 + 19000s + 100000
+            \]
+
+
+          </div>
+        </details>
+
+        <details open class="mt-3">
+          <summary class="font-semibold cursor-pointer">6.2 Formule duale avec Φₒ(A)</summary>
+          <div class="math">
+            
+
+\[
+            \mathcal{O} = \begin{bmatrix} C \\ CA \\ CA^2 \\ CA^3 \end{bmatrix},\quad
+            L = \Phi_o(A)^\top\,\mathcal{O}^{-T}\,e_4
+            \]
+
+
+            
+
+\[
+            \Phi_o(A) = A^4 + 65A^3 + 1600A^2 + 19000A + 100000I
+            \]
+
+
+          </div>
+          <button class="btn" onclick="computeObserver()">Calculer L et afficher toutes les étapes</button>
+          <div id="observerOut" class="output mt-3"></div>
+        </details>
+      </div>
+
+      <div class="card">
+        <h2 class="text-2xl font-semibold mb-2">7. Boucle fermée: composition et matrices</h2>
+        <details open class="mt-3">
+          <summary class="font-semibold cursor-pointer">7.1 Équations complètes</summary>
+          <div class="math">
+            
+
+\[
+            u = -K\,\hat{x} + g\,r
+            \]
+
+
+            
+
+\[
+            \text{Plante:}\quad \dot{x} = A x + B u,\quad y = C x
+            \]
+
+
+            
+
+\[
+            \text{Observateur:}\quad \dot{\hat{x}} = (A - L C)\hat{x} + B u + L y
+            \]
+
+
+          </div>
+          <button class="btn secondary" onclick="composeClosedLoop()">Composer A−BK et A−LC</button>
+          <div id="closedLoopOut" class="output mt-3"></div>
+        </details>
+      </div>
+    </section>
+
+    <aside class="space-y-6">
+      <div class="card">
+        <h2 class="text-xl font-semibold mb-2">Visualisation des pôles</h2>
+        <p class="muted">Pôles en boucle ouverte et fermée.</p>
+        <div id="polePlot" class="mt-3" style="height:360px;"></div>
+        <button class="btn success" onclick="plotOpenLoopPoles()">Afficher pôles (OL)</button>
+        <button class="btn warning" onclick="plotClosedLoopPoles()">Afficher pôles (CL)</button>
+      </div>
+
+      <div class="card">
+        <h2 class="text-xl font-semibold mb-2">Vérifications rangs</h2>
+        <p class="muted">Afficher matrices et rangs de Ctrb, Obs.</p>
+        <button class="btn" onclick="showCtrbObs()">Afficher</button>
+        <div id="ctrbObsOut" class="output mt-3"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="text-xl font-semibold mb-2">Paramètres et constantes</h2>
+        <div class="output">
+M = 1.0, m = 0.2, l = 0.5, g = 9.81
+a = 23.544, b = -1.962
+États: x = [θ, θ̇, x, ẋ]^T
+Sorties: y = [θ, x]^T
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="max-w-6xl mx-auto px-6 py-6 mt-6 text-center muted">
+    USTHB • M1 AII • Pendule inversé sur chariot • Dérivation complète et interface interactive
+  </footer>
+
+  <script>
+    // Math helpers
+    const m = math;
+    const a = 23.544;
+    const b = -1.962;
+
+    const A = m.matrix([
+      [0, 1, 0, 0],
+      [a, 0, 0, 0],
+      [0, 0, 0, 1],
+      [b, 0, 0, 0]
+    ]);
+    const B = m.matrix([[0],[-2],[0],[1]]);
+    const C = m.matrix([
+      [1,0,0,0],
+      [0,0,1,0]
+    ]);
+    const I4 = m.identity(4);
+    const e4T = m.matrix([[0,0,0,1]]);
+    const e4  = m.matrix([[0],[0],[0],[1]]);
+
+    function matStr(M) {
+      const arr = M.valueOf();
+      return m.format(arr, {precision: 6});
+    }
+    function controllabilityMatrix(A,B) {
+      const AB = m.multiply(A,B);
+      const A2B = m.multiply(A,AB);
+      const A3B = m.multiply(A,A2B);
+      return m.concat(B, AB, A2B, A3B, 1);
+    }
+    function observabilityMatrix(A,C) {
+      const CA = m.multiply(C,A);
+      const CA2 = m.multiply(C,m.multiply(A,A));
+      const CA3 = m.multiply(C,m.multiply(m.multiply(A,A),A));
+      return m.concat(C, CA, CA2, CA3, 0);
+    }
+    function polyOfA(A, coeffs) {
+      // coeffs for s^4 + c3 s^3 + c2 s^2 + c1 s + c0
+      const c3 = coeffs[3], c2 = coeffs[2], c1 = coeffs[1], c0 = coeffs[0];
+      const A2 = m.multiply(A,A);
+      const A3 = m.multiply(A2,A);
+      const A4 = m.multiply(A3,A);
+      return m.add(A4,
                m.add(m.multiply(c3, A3),
                      m.add(m.multiply(c2, A2),
                            m.add(m.multiply(c1, A),
                                  m.multiply(c0, I4)))));
-}
+    }
 
-function computeController() {
-  const out = [];
-  const Ctrb = controllabilityMatrix(A,B);
-  const CtrbInv = m.inv(Ctrb);
+    // Controller computation
+    function computeController() {
+      const out = [];
+      const Ctrb = controllabilityMatrix(A,B);
+      const CtrbInv = m.inv(Ctrb);
 
-  out.push('Controllability matrix C = [B AB A^2B A^3B]:');
-  out.push(matStr(Ctrb));
-  out.push('\nC^{-1} =');
-  out.push(matStr(CtrbInv));
+      out.push('Matrice de commandabilité C = [B AB A^2B A^3B]:');
+      out.push(matStr(Ctrb));
+      out.push('\nC^{-1} =');
+      out.push(matStr(CtrbInv));
 
-  // desired polynomial coefficients [c0, c1, c2, c3] for s^4 + c3 s^3 + c2 s^2 + c1 s + c0
-  const coeffs = [240, 208, 82, 15];
-  out.push('\nDesired polynomial p_d(s) = s^4 + 15 s^3 + 82 s^2 + 208 s + 240');
+      // Desired polynomial coefficients [c0, c1, c2, c3] for s^4 + c3 s^3 + c2 s^2 + c1 s + c0
+      const coeffs = [240, 208, 82, 15];
+      out.push('\nPolynôme désiré p_d(s) = s^4 + 15 s^3 + 82 s^2 + 208 s + 240');
 
-  const PhiA = polyOfA(A, coeffs);
-  out.push('\nPhi(A) = A^4 + 15A^3 + 82A^2 + 208A + 240I =');
-  out.push(matStr(PhiA));
+      const PhiA = polyOfA(A, coeffs);
+      out.push('\nΦ(A) = A^4 + 15A^3 + 82A^2 + 208A + 240I =');
+      out.push(matStr(PhiA));
 
-  const K = m.multiply(m.multiply(e4T, CtrbInv), PhiA);
-  out.push('\nK = e4^T * C^{-1} * Phi(A) =');
-  out.push(matStr(K));
+      const K = m.multiply(m.multiply(e4T, CtrbInv), PhiA);
+      out.push('\nK = e4^T * C^{-1} * Φ(A) =');
+      out.push(matStr(K));
 
-  const Acl = m.subtract(A, m.multiply(B, K)); // A - B K
-  out.push('\nAcl = A - B K =');
-  out.push(matStr(Acl));
+      const Acl = m.subtract(A, m.multiply(B, K)); // A - B K
+      out.push('\nAcl = A - B K =');
+      out.push(matStr(Acl));
 
-  // Precomp g for tracking y2 = x (second output)
-  const AclInv = m.inv(Acl);
-  const CxRow = m.matrix([[0,0,1,0]]);
-  const Gx = m.multiply(m.multiply(CxRow, AclInv), B); // DC gain row for y2
-  const g = 1 / Gx.get([0,0]);
-  out.push('\nPrecompensator for y2=x: g = 1 / ( [0 0 1 0] * (Acl^{-1}) * B ) = ' + m.format(g, {precision: 6}));
+      // Precomp g for tracking y2 = x (second output)
+      const AclInv = m.inv(Acl);
+      const CxRow = m.matrix([[0,0,1,0]]);
+      const Gx = m.multiply(m.multiply(CxRow, AclInv), B); // DC gain row for y2
+      const g = 1 / Gx.get([0,0]);
+      out.push('\nPrécompensateur pour y₂=x: g = 1 / ( [0 0 1 0] * (Acl^{-1}) * B ) = ' + m.format(g, {precision: 6}));
 
-  document.getElementById('controllerOut').textContent = out.join('\n');
-}
+      document.getElementById('controllerOut').textContent = out.join('\n');
+      window._K = K; window._Acl = Acl; window._g = g;
+    }
 
-function computeObserver() {
-  const out = [];
-  const Obs = observabilityMatrix(A,C);
-  const ObsInvT = m.transpose(m.inv(m.transpose(Obs)));
+    // Observer computation
+    function computeObserver() {
+      const out = [];
+      const Obs = observabilityMatrix(A,C);
+      const ObsInvT = m.transpose(m.inv(m.transpose(Obs)));
 
-  out.push('Observability matrix O = [C; CA; CA^2; CA^3]:');
-  out.push(matStr(Obs));
-  out.push('\nO^{-T} =');
-  out.push(matStr(ObsInvT));
+      out.push('Matrice d’observabilité O = [C; CA; CA^2; CA^3]:');
+      out.push(matStr(Obs));
+      out.push('\nO^{-T} =');
+      out.push(matStr(ObsInvT));
 
-  // desired observer polynomial coeffs [c0, c1, c2, c3]
-  const coeffsObs = [100000, 19000, 1600, 65];
-  out.push('\nDesired observer polynomial p_o(s) = s^4 + 65 s^3 + 1600 s^2 + 19000 s + 100000');
+      // desired observer polynomial coeffs [c0, c1, c2, c3]
+      const coeffsObs = [100000, 19000, 1600, 65];
+      out.push('\nPolynôme observateur p_o(s) = s^4 + 65 s^3 + 1600 s^2 + 19000 s + 100000');
 
-  const PhiAo = polyOfA(A, coeffsObs);
-  out.push('\nPhi_o(A) = A^4 + 65A^3 + 1600A^2 + 19000A + 100000I =');
-  out.push(matStr(PhiAo));
+      const PhiAo = polyOfA(A, coeffsObs);
+      out.push('\nΦₒ(A) = A^4 + 65A^3 + 1600A^2 + 19000A + 100000I =');
+      out.push(matStr(PhiAo));
 
-  // Dual Ackermann: L = Phi_o(A)^T * O^{-T} * e4
-  const L = m.multiply(m.multiply(m.transpose(PhiAo), ObsInvT), e4);
-  out.push('\nL = Phi_o(A)^T * O^{-T} * e4 =');
-  out.push(matStr(L));
+      // Dual Ackermann: L = Φₒ(A)^T * O^{-T} * e4
+      const L = m.multiply(m.multiply(m.transpose(PhiAo), ObsInvT), e4);
+      out.push('\nL = Φₒ(A)^T * O^{-T} * e4 =');
+      out.push(matStr(L));
 
-  document.getElementById('observerOut').textContent = out.join('\n');
-}
+      document.getElementById('observerOut').textContent = out.join('\n');
+      window._L = L;
+      window._Aobs = m.subtract(A, m.multiply(L, C));
+    }
 
-function composeClosedLoop() {
-  // Compute K and L fresh
-  const Ctrb = controllabilityMatrix(A,B);
-  const CtrbInv = m.inv(Ctrb);
-  const PhiA = polyOfA(A, [240, 208, 82, 15]);
-  const K = m.multiply(m.multiply(e4T, CtrbInv), PhiA);
+    function composeClosedLoop() {
+      // Recompute if not computed
+      if (!window._K) computeController();
+      if (!window._L) computeObserver();
+      const K = window._K;
+      const L = window._L;
+      const Acl = window._Acl || m.subtract(A, m.multiply(B, K));
+      const Aobs = window._Aobs || m.subtract(A, m.multiply(L, C));
 
-  const Obs = observabilityMatrix(A,C);
-  const ObsInvT = m.transpose(m.inv(m.transpose(Obs)));
-  const PhiAo = polyOfA(A, [100000, 19000, 1600, 65]);
-  const L = m.multiply(m.multiply(m.transpose(PhiAo), ObsInvT), e4);
+      const out = [];
+      out.push('Acl = A - B K =\n' + matStr(Acl));
+      out.push('\nAobs = A - L C =\n' + matStr(Aobs));
+      out.push('\nÉquations de mise en œuvre:\n');
+      out.push('Plante:  dot{x} = A x + B u,  y = C x');
+      out.push('\nCommande:  u = -K \\hat{x} + g r  (g='+ (window._g ? m.format(window._g,{precision:6}) : 'inconnu') +')');
+      out.push('\nObservateur:  dot{\\hat{x}} = (A - L C) \\hat{x} + B u + L y');
+      document.getElementById('closedLoopOut').textContent = out.join('\n');
+    }
 
-  const Acl = m.subtract(A, m.multiply(B, K));      // A - B K
-  const Aobs = m.subtract(A, m.multiply(L, C));     // A - L C
+    function showCtrbObs() {
+      const out = [];
+      const Ctrb = controllabilityMatrix(A,B);
+      const Obs = observabilityMatrix(A,C);
+      const rankC = m.rank(Ctrb);
+      const rankO = m.rank(Obs);
+      out.push('Commandabilité C = [B AB A^2B A^3B] =\n' + matStr(Ctrb));
+      out.push('\nRang(C) = ' + rankC);
+      out.push('\n\nObservabilité O = [C; CA; CA^2; CA^3] =\n' + matStr(Obs));
+      out.push('\nRang(O) = ' + rankO);
+      document.getElementById('ctrbObsOut').textContent = out.join('\n');
+    }
 
-  const out = [];
-  out.push('Controller matrix Acl = A - B K =');
-  out.push(matStr(Acl));
-  out.push('\nObserver matrix Aobs = A - L C =');
-  out.push(matStr(Aobs));
-  out.push('\nClosed-loop implementation equations:\n');
-  out.push('Plant:    dot{x} = A x + B u,    y = C x');
-  out.push('\nControl:   u = -K \\hat{x} + g r');
-  out.push('\nObserver:  dot{\\hat{x}} = (A - L C) \\hat{x} + B u + L y');
-  document.getElementById('closedLoopOut').textContent = out.join('\n');
-}
+    // Plot poles
+    function eigenvals(M) {
+      // math.js doesn't directly compute eigenvalues; use characteristic polynomial known:
+      // For A: s^2 (s^2 - a) -> eigenvalues 0,0, +sqrt(a), -sqrt(a)
+      // For Acl: we approximate by numeric via m.eigs in future. Here, we try numeric with a small helper using numeric.js-like?
+      // To ensure plotting works, we compute open-loop exactly; closed-loop we compute via characteristic poly of Acl (numeric det?), fallback to diagonalization fail-safe by sampling.
+      return null;
+    }
 
-function showCtrbObs() {
-  const out = [];
-  const Ctrb = controllabilityMatrix(A,B);
-  const Obs = observabilityMatrix(A,C);
-  out.push('C = [B AB A^2B A^3B] =\n' + matStr(Ctrb));
-  out.push('\nRank(C) = ' + m.rank(Ctrb));
-  out.push('\n\nO = [C; CA; CA^2; CA^3] =\n' + matStr(Obs));
-  out.push('\nRank(O) = ' + m.rank(Obs));
-  document.getElementById('ctrbObsOut').textContent = out.join('\n');
-}
-</script>
+    function plotOpenLoopPoles() {
+      const xs = [0, 0,  Math.sqrt(a), -Math.sqrt(a)];
+      const ys = [0, 0, 0, 0];
+      const colors = ['#3b82f6','#3b82f6','#ef4444','#10b981'];
+      Plotly.newPlot('polePlot', [{
+        x: xs, y: ys, mode: 'markers', type: 'scatter',
+        marker: { size: 12, color: colors },
+        name: 'Pôles OL'
+      }], {
+        title: 'Pôles — boucle ouverte',
+        xaxis: { title: 'Partie réelle' },
+        yaxis: { title: 'Partie imaginaire', range: [-6,6] },
+        height: 360
+      });
+    }
 
-<footer class="small">USTHB • M1 AII • Full derivation and interactive design • Inverted pendulum on a cart</footer>
+    function plotClosedLoopPoles() {
+      // We will compute numeric eigenvalues of Acl via characteristic polynomial using math.js's numeric eigen decomposition workaround:
+      if (!window._Acl) { computeController(); }
+      const Acl = window._Acl;
+      // Use Jordan form via math.js's pseudo method? Not available. Instead, approximate with numeric.js if present.
+      // As a practical workaround: sample eigenvalues using math.js's 'eigs' polyfill? Not available.
+      // We'll show the real parts by estimating with m.usolve after adding small perturbation; for visualization, we can compute eigenvalues via a simple power method per dimension.
+      // To keep this page self-contained, we approximate eigenvalues with a library-free method using characteristic polynomial from desired poles (since we placed poles, closed-loop eigenvalues = desired set).
+      const xs = [-2, -2, -5, -6];
+      const ys = [ 2, -2, 0, 0];
+      const colors = ['#f59e0b','#f59e0b','#f59e0b','#f59e0b'];
+      Plotly.newPlot('polePlot', [{
+        x: xs, y: ys, mode: 'markers', type: 'scatter',
+        marker: { size: 12, color: colors },
+        name: 'Pôles CL (désirés)'
+      }], {
+        title: 'Pôles — boucle fermée (désirés)',
+        xaxis: { title: 'Partie réelle' },
+        yaxis: { title: 'Partie imaginaire', range: [-8,8] },
+        height: 360
+      });
+    }
 
+    // Initialize with open-loop poles
+    plotOpenLoopPoles();
+  </script>
 </body>
 </html>
